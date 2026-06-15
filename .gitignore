@@ -162,3 +162,7 @@ events.out.tfevents*
 /.vscode/
 /.idea/
 .DS_Store
+
+# Local transfer archives
+*.tar.gz
+*.zip

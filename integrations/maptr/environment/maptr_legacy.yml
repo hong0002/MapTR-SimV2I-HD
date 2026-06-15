@@ -6,7 +6,15 @@ channels:
 dependencies:
   - python=3.8
   - pip
+  - setuptools=59.5.0
+  - yapf=0.40.1
   - numpy=1.19.5
+  - numba=0.48.0
+  - networkx=2.2
+  - scikit-image=0.19.3
+  - pandas=1.3.5
+  - plyfile=0.7.4
+  - ipython=8.12.2
   - pytorch=1.9.1
   - torchvision=0.10.1
   - torchaudio=0.9.1
@@ -17,9 +25,10 @@ dependencies:
       - mmdet==2.14.0
       - mmsegmentation==0.14.1
       - shapely==1.8.5.post1
-      - nuscenes-devkit
-      - av2
-      - timm
+      - nuscenes-devkit==1.1.9
+      - lyft-dataset-sdk==0.0.8
+      # AV2 requires a newer NumPy stack; install it in a separate environment.
+      - timm==0.4.12
       - pillow
       - opencv-python
       - tensorboard

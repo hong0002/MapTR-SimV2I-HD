@@ -33,6 +33,9 @@ bev_w_ = 40
 
 model = dict(
     pretrained=None,
+    img_backbone=dict(
+        norm_cfg=dict(type='BN', requires_grad=True),
+    ),
     pts_bbox_head=dict(
         bev_h=bev_h_,
         bev_w=bev_w_,
