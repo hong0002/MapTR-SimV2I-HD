@@ -145,3 +145,20 @@ dmypy.json
 .pyre/
 
 cluster.sh
+
+# SimV2I-HD local data and experiment artifacts
+/outputs/
+/wandb/
+/mlruns/
+/.tensorboard-info/
+events.out.tfevents*
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.engine
+
+# Local editor and OS settings
+/.vscode/
+/.idea/
+.DS_Store

@@ -1,0 +1,25 @@
+name: maptr_simv2i
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+  - numpy=1.19.5
+  - pytorch=1.9.1
+  - torchvision=0.10.1
+  - torchaudio=0.9.1
+  - cudatoolkit=11.1
+  - pip:
+      - --find-links https://download.openmmlab.com/mmcv/dist/cu111/torch1.9.0/index.html
+      - mmcv-full==1.4.0
+      - mmdet==2.14.0
+      - mmsegmentation==0.14.1
+      - shapely==1.8.5.post1
+      - nuscenes-devkit
+      - av2
+      - timm
+      - pillow
+      - opencv-python
+      - tensorboard
