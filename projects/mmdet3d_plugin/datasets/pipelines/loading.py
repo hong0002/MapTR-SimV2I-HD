@@ -16,6 +16,60 @@ from .loading_utils import load_augmented_point_cloud, reduce_LiDAR_beams
 
 
 @PIPELINES.register_module()
+class SimV2ILoadMultiViewImageFromFiles(object):
+    """Load SimV2I multi-view images and discard an optional alpha channel."""
+
+    def __init__(self, to_float32=False, color_type='unchanged'):
+        self.to_float32 = to_float32
+        self.color_type = color_type
+
+    @staticmethod
+    def _ensure_three_channels(img, filename):
+        if img.ndim == 3 and img.shape[2] == 4:
+            return img[..., :3]
+        if img.ndim == 3 and img.shape[2] == 3:
+            return img
+        raise ValueError(
+            'SimV2I camera image must have 3 or 4 channels, got {} for {}.'
+            .format(img.shape, filename)
+        )
+
+    def __call__(self, results):
+        filenames = results['img_filename']
+        img_list = [
+            self._ensure_three_channels(
+                mmcv.imread(filename, self.color_type), filename
+            )
+            for filename in filenames
+        ]
+        img = np.stack(img_list, axis=-1)
+
+        if self.to_float32:
+            img = img.astype(np.float32)
+        results['filename'] = filenames
+        results['img'] = [img[..., i] for i in range(img.shape[-1])]
+        results['img_shape'] = img.shape
+        results['ori_shape'] = img.shape
+        results['pad_shape'] = img.shape
+        results['scale_factor'] = 1.0
+        results['img_norm_cfg'] = dict(
+            mean=np.zeros(3, dtype=np.float32),
+            std=np.ones(3, dtype=np.float32),
+            to_rgb=False,
+        )
+        return results
+
+    def __repr__(self):
+        return (
+            '{}(to_float32={}, color_type={!r})'.format(
+                self.__class__.__name__,
+                self.to_float32,
+                self.color_type,
+            )
+        )
+
+
+@PIPELINES.register_module()
 class CustomLoadMultiViewImageFromFiles(object):
     """Load multi channel images from a list of separate channel files.
 
@@ -365,4 +419,3 @@ class CustomLoadPointsFromFile:
         results["points"] = points
 
         return results
-

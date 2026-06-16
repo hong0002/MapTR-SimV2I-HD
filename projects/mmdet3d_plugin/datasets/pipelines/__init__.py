@@ -3,8 +3,15 @@ from .transform_3d import (
     PhotoMetricDistortionMultiViewImage, CustomCollect3D, RandomScaleImageMultiViewImage, CustomPointsRangeFilter)
 from .formating import CustomDefaultFormatBundle3D
 
-from .loading import CustomLoadPointsFromFile, CustomLoadPointsFromMultiSweeps, CustomLoadMultiViewImageFromFiles
+from .loading import (
+    CustomLoadMultiViewImageFromFiles,
+    CustomLoadPointsFromFile,
+    CustomLoadPointsFromMultiSweeps,
+    SimV2ILoadMultiViewImageFromFiles,
+)
 __all__ = [
     'PadMultiViewImage', 'NormalizeMultiviewImage', 
-    'PhotoMetricDistortionMultiViewImage', 'CustomDefaultFormatBundle3D', 'CustomCollect3D', 'RandomScaleImageMultiViewImage'
+    'PhotoMetricDistortionMultiViewImage', 'CustomDefaultFormatBundle3D',
+    'CustomCollect3D', 'RandomScaleImageMultiViewImage',
+    'SimV2ILoadMultiViewImageFromFiles'
 ]
