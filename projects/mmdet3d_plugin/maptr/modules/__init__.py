@@ -3,3 +3,4 @@ from .decoder import MapTRDecoder
 from .geometry_kernel_attention import GeometrySptialCrossAttention, GeometryKernelAttention
 from .builder import build_fuser
 from .encoder import LSSTransform
+from .pose_gated_rsu_fusion import PoseAwareGatedRSUFusion
