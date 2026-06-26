@@ -25,6 +25,19 @@ EGO_CAMERA_NAMES = (
     'CAM_BACK_LEFT',
     'CAM_BACK_RIGHT',
 )
+RSU_CAMERA_NAMES = (
+    'rsu_00_rgb',
+    'rsu_01_rgb',
+    'rsu_02_rgb',
+    'rsu_03_rgb',
+)
+V2I_VIEW_MODES = {
+    'ego_only': ('ego', 0),
+    'infra_only_4rsu': ('infra', 4),
+    'v2i_1rsu': ('v2i', 1),
+    'v2i_2rsu': ('v2i', 2),
+    'v2i_4rsu': ('v2i', 4),
+}
 
 
 @DATASETS.register_module()
@@ -56,11 +69,35 @@ class SimV2IMapDataset(CustomNuScenesLocalMapDataset):
         eval_use_same_gt_sample_num_flag=True,
         padding_value=-10000,
         map_classes=None,
+        view_mode='ego_only',
+        rsu_camera_names=None,
+        selected_cams=None,
+        rsu_selection_policy='first_valid',
         *args,
         **kwargs
     ):
         self.map_ann_file = map_ann_file
         self.camera_names = tuple(camera_names or EGO_CAMERA_NAMES)
+        self.rsu_camera_names = (
+            tuple(RSU_CAMERA_NAMES)
+            if rsu_camera_names is None
+            else tuple(rsu_camera_names)
+        )
+        self.selected_cams = tuple(selected_cams or ())
+        self.view_mode = view_mode
+        self.rsu_selection_policy = rsu_selection_policy
+        if self.selected_cams and self.view_mode != 'custom':
+            self.view_mode = 'custom'
+        if self.view_mode not in V2I_VIEW_MODES and self.view_mode != 'custom':
+            raise ValueError(
+                'Unsupported SimV2I view_mode: {}'.format(self.view_mode)
+            )
+        if self.rsu_selection_policy != 'first_valid':
+            raise ValueError(
+                'Unsupported RSU selection policy: {}'.format(
+                    self.rsu_selection_policy
+                )
+            )
         self.queue_length = queue_length
         self.overlap_test = overlap_test
         self.bev_size = bev_size
@@ -234,6 +271,101 @@ class SimV2IMapDataset(CustomNuScenesLocalMapDataset):
             intrinsic_4x4,
         )
 
+    @staticmethod
+    def _has_valid_image(cam_info):
+        return isinstance(cam_info, dict) and bool(
+            cam_info.get('data_path') or cam_info.get('img_path')
+        )
+
+    def _rsu_items(self, info):
+        rsu_cams = info.get('rsu_cams', {})
+        if not isinstance(rsu_cams, dict):
+            return []
+        items = []
+        selected_names = set()
+        for name in self.rsu_camera_names:
+            cam_info = rsu_cams.get(name)
+            if self._has_valid_image(cam_info):
+                items.append(('rsu', name, cam_info))
+                selected_names.add(name)
+        for name, cam_info in rsu_cams.items():
+            if name in selected_names:
+                continue
+            if self._has_valid_image(cam_info):
+                items.append(('rsu', name, cam_info))
+                selected_names.add(name)
+        return items
+
+    def _ego_items(self, info):
+        cams = info.get('cams', {})
+        if not isinstance(cams, dict):
+            raise KeyError(
+                'Sample {} cams is not a dictionary.'.format(info['token'])
+            )
+        missing = [
+            name
+            for name in self.camera_names
+            if not self._has_valid_image(cams.get(name))
+        ]
+        if missing:
+            raise KeyError(
+                'Sample {} is missing ego cameras: {}'.format(
+                    info['token'], ', '.join(missing)
+                )
+            )
+        return [('ego', name, cams[name]) for name in self.camera_names]
+
+    def _custom_camera_items(self, info):
+        cams = info.get('cams', {})
+        rsu_cams = info.get('rsu_cams', {})
+        items = []
+        for raw_name in self.selected_cams:
+            if raw_name.startswith('ego:'):
+                group, name = 'ego', raw_name.split(':', 1)[1]
+            elif raw_name.startswith('rsu:'):
+                group, name = 'rsu', raw_name.split(':', 1)[1]
+            elif raw_name in cams:
+                group, name = 'ego', raw_name
+            elif raw_name in rsu_cams:
+                group, name = 'rsu', raw_name
+            else:
+                raise KeyError(
+                    'Sample {} has no selected camera {}.'.format(
+                        info['token'], raw_name
+                    )
+                )
+            cam_info = cams[name] if group == 'ego' else rsu_cams[name]
+            if not self._has_valid_image(cam_info):
+                raise KeyError(
+                    'Selected camera {} has no data_path in sample {}.'.format(
+                        raw_name, info['token']
+                    )
+                )
+            items.append((group, name, cam_info))
+        return items
+
+    def _selected_camera_items(self, info):
+        if self.view_mode == 'custom':
+            if not self.selected_cams:
+                raise ValueError('custom view_mode requires selected_cams.')
+            return self._custom_camera_items(info)
+
+        mode_type, rsu_count = V2I_VIEW_MODES[self.view_mode]
+        if mode_type == 'ego':
+            return self._ego_items(info)
+
+        rsu_items = self._rsu_items(info)
+        if len(rsu_items) < rsu_count:
+            raise KeyError(
+                'Sample {} needs {} RSU cameras for {}, got {}.'.format(
+                    info['token'], rsu_count, self.view_mode, len(rsu_items)
+                )
+            )
+        rsu_items = rsu_items[:rsu_count]
+        if mode_type == 'infra':
+            return rsu_items
+        return self._ego_items(info) + rsu_items
+
     def get_data_info(self, index):
         info = self.data_infos[index]
         ego_translation = np.asarray(
@@ -293,42 +425,39 @@ class SimV2IMapDataset(CustomNuScenesLocalMapDataset):
         )
 
         if self.modality['use_camera']:
-            cams = info.get('cams', {})
-            missing = [name for name in self.camera_names if name not in cams]
-            if missing:
-                raise KeyError(
-                    'Sample {} is missing cameras: {}'.format(
-                        info['token'], ', '.join(missing)
-                    )
-                )
-
+            selected_items = self._selected_camera_items(info)
             image_paths = []
             lidar2img = []
             camera2ego = []
             camera_intrinsics = []
-            for camera_name in self.camera_names:
-                cam_info = cams[camera_name]
-                if 'data_path' not in cam_info:
+            selected_camera_names = []
+            selected_camera_groups = []
+            for camera_group, camera_name, cam_info in selected_items:
+                data_path = cam_info.get('data_path', cam_info.get('img_path'))
+                if not data_path:
                     raise KeyError(
                         '{} has no data_path in sample {}.'.format(
                             camera_name, info['token']
                         )
                     )
-                image_paths.append(
-                    self._resolve_data_path(cam_info['data_path'])
-                )
+                image_paths.append(self._resolve_data_path(data_path))
                 cam_lidar2img, cam_camera2ego, cam_intrinsic = (
                     self._camera_matrices(cam_info)
                 )
                 lidar2img.append(cam_lidar2img)
                 camera2ego.append(cam_camera2ego)
                 camera_intrinsics.append(cam_intrinsic)
+                selected_camera_names.append(camera_name)
+                selected_camera_groups.append(camera_group)
 
             input_dict.update(
                 img_filename=image_paths,
                 lidar2img=lidar2img,
                 camera2ego=camera2ego,
                 camera_intrinsics=camera_intrinsics,
+                selected_camera_names=selected_camera_names,
+                selected_camera_groups=selected_camera_groups,
+                view_mode=self.view_mode,
             )
         return input_dict
 
@@ -435,11 +564,25 @@ class SimV2IMapDataset(CustomNuScenesLocalMapDataset):
                 self._append_vector(lines, labels, points, label)
             return lines, labels
 
-        if 'gt_vecs' in info and 'gt_labels' in info:
-            if len(info['gt_vecs']) != len(info['gt_labels']):
-                raise ValueError('gt_vecs and gt_labels lengths do not match.')
+        points_key = None
+        labels_key = None
+        for candidate_points_key, candidate_labels_key in (
+            ('gt_vecs', 'gt_labels'),
+            ('maptr_gt_fixed_points', 'maptr_gt_labels'),
+        ):
+            if candidate_points_key in info and candidate_labels_key in info:
+                points_key = candidate_points_key
+                labels_key = candidate_labels_key
+                break
+        if points_key is not None:
+            if len(info[points_key]) != len(info[labels_key]):
+                raise ValueError(
+                    '{} and {} lengths do not match.'.format(
+                        points_key, labels_key
+                    )
+                )
             for points, class_value in zip(
-                info['gt_vecs'], info['gt_labels']
+                info[points_key], info[labels_key]
             ):
                 label = self._label_from_value(class_value, source_classes)
                 self._append_vector(lines, labels, points, label)
@@ -447,7 +590,8 @@ class SimV2IMapDataset(CustomNuScenesLocalMapDataset):
 
         raise KeyError(
             'No precomputed map vectors found. Expected gt_vectors, vectors, '
-            'map_annos, gt_map_annos, or gt_vecs plus gt_labels.'
+            'map_annos, gt_map_annos, gt_vecs plus gt_labels, or '
+            'maptr_gt_fixed_points plus maptr_gt_labels.'
         )
 
     def vectormap_pipeline(self, example, input_dict):

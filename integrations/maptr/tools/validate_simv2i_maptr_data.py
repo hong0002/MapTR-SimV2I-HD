@@ -154,12 +154,24 @@ def vector_count_and_classes(info, declared_classes):
             observed[class_name(value, declared_classes)] += 1
         return len(records), observed
 
-    if 'gt_vecs' in info and 'gt_labels' in info:
-        if len(info['gt_vecs']) != len(info['gt_labels']):
-            raise ValueError('gt_vecs and gt_labels lengths differ')
-        for value in info['gt_labels']:
+    points_key = None
+    labels_key = None
+    for candidate_points_key, candidate_labels_key in (
+        ('gt_vecs', 'gt_labels'),
+        ('maptr_gt_fixed_points', 'maptr_gt_labels'),
+    ):
+        if candidate_points_key in info and candidate_labels_key in info:
+            points_key = candidate_points_key
+            labels_key = candidate_labels_key
+            break
+    if points_key is not None:
+        if len(info[points_key]) != len(info[labels_key]):
+            raise ValueError('{} and {} lengths differ'.format(
+                points_key, labels_key
+            ))
+        for value in info[labels_key]:
             observed[class_name(value, declared_classes)] += 1
-        return len(info['gt_vecs']), observed
+        return len(info[points_key]), observed
 
     raise KeyError('no supported precomputed map vector field found')
 
