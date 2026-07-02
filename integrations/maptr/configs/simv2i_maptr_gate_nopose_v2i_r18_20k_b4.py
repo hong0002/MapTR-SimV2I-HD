@@ -1,13 +1,21 @@
+import os as _os
+
 _base_ = './simv2i_maptr_pose_gated_v2i_r18_20k_b4.py'
 
 dataset_name = 'simv2i_hd_benchmark_v2_dynamic_rsu_20k'
-dataset_dir = 'data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k'
+_simv2i_hd_root = _os.getenv('SIMV2I_HD_ROOT')
+del _os
+dataset_dir = (
+    _simv2i_hd_root
+    or 'data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k'
+)
 eval_cache_dir = 'outputs/maptr/eval_cache'
 work_dir = 'outputs/maptr/gate_nopose_v2i_r18_20k_b4'
 
-# The pkl stores image paths as repo-relative data/raw/... paths, so the
-# runtime data_root must stay at repo root. dataset_dir is the MapTR pkl root.
-data_root = '.'
+# When SIMV2I_HD_ROOT is set, both the split PKLs and the image paths stored in
+# them are resolved from that external dataset root. Without it, keep the
+# original repo-relative data/maptr + data/raw layout for backward compatibility.
+data_root = _simv2i_hd_root or '.'
 
 num_ego_views = 6
 num_rsu_views = 4

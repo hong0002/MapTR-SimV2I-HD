@@ -51,7 +51,8 @@ files, or obsolete GT exports.
   accepts the existing MapTR `sensor2lidar_rotation` and
   `sensor2lidar_translation` fields.
 
-All paths must be relative to the MapTR project root:
+All paths should be relative to the configured dataset root. In the legacy
+workspace fallback, this was the MapTR project root:
 
 ```text
 data/raw/town10_maptr_v1/sensors/ego_rgb_front/15971219.png
@@ -59,7 +60,7 @@ data/raw/town10_maptr_v1/sensors/ego_rgb_front/15971219.png
 
 Forbidden:
 
-- `E:/Desktop/...` or any Windows absolute path
+- Windows absolute paths
 - Backslash-separated Windows paths
 - Any path containing `_invalid_pre_od_yflip`
 - GT generated before the OpenDRIVE y-axis correction

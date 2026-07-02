@@ -114,6 +114,11 @@ PAPER_READY_STYLE = {
     "subplot_bottom": 0.205,
 }
 
+DEFAULT_DATA_ROOT = os.environ.get(
+    "SIMV2I_HD_ROOT",
+    "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k",
+)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -121,17 +126,11 @@ def parse_args():
     )
     parser.add_argument(
         "--gt-json",
-        default=(
-            "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/"
-            "simv2i_maptr_map_gt_test.json"
-        ),
+        default=os.path.join(DEFAULT_DATA_ROOT, "simv2i_maptr_map_gt_test.json"),
     )
     parser.add_argument(
         "--infos-pkl",
-        default=(
-            "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/"
-            "simv2i_maptr_infos_test.pkl"
-        ),
+        default=os.path.join(DEFAULT_DATA_ROOT, "simv2i_maptr_infos_test.pkl"),
     )
     parser.add_argument(
         "--pred-pkl",

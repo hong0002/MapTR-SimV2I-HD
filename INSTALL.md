@@ -7,7 +7,8 @@ MMDetection3D and MapTR CUDA extensions.
 ## 1. Clone And Enter The Repository
 
 ```bash
-export MAPTR_ROOT=/path/to/MapTR
+export MAPTR_ROOT=/path/to/MapTR-SimV2I-HD
+export SIMV2I_HD_ROOT=/path/to/simv2i_hd_benchmark_v2_dynamic_rsu_20k
 cd "${MAPTR_ROOT}"
 ```
 
@@ -15,11 +16,12 @@ Optional helper environment variables used by scripts:
 
 ```bash
 export MAPTR_PYTHON=python
-export SIMV2I_HD_ROOT=/path/to/simv2i_hd_dataset
 ```
 
 `MAPTR_PYTHON` can point to an explicit interpreter such as
-`/path/to/miniconda/envs/maptr_simv2i/bin/python`.
+`/path/to/miniconda/envs/maptr_simv2i/bin/python`. `SIMV2I_HD_ROOT` should
+point to the prepared external SimV2I-HD MapTR-format dataset; the dataset is
+not installed into this git repository.
 
 ## 2. Create The Conda Environment
 

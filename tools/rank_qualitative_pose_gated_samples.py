@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -23,14 +24,12 @@ except Exception:  # pragma: no cover - exercised only when scipy is absent.
     cKDTree = None
 
 
-DEFAULT_GT_JSON = (
-    "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/"
-    "simv2i_maptr_map_gt_test.json"
+DEFAULT_DATA_ROOT = os.environ.get(
+    "SIMV2I_HD_ROOT",
+    "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k",
 )
-DEFAULT_INFOS = (
-    "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/"
-    "simv2i_maptr_infos_test.pkl"
-)
+DEFAULT_GT_JSON = os.path.join(DEFAULT_DATA_ROOT, "simv2i_maptr_map_gt_test.json")
+DEFAULT_INFOS = os.path.join(DEFAULT_DATA_ROOT, "simv2i_maptr_infos_test.pkl")
 DEFAULT_PREDS = {
     "ego": "outputs/maptr/visualization_predictions/ego_only_test_epoch18.pkl",
     "dynamic": (

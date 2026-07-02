@@ -25,15 +25,17 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[1]
-INFO_PKL = (
-    ROOT
-    / "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/"
-    "simv2i_maptr_infos_test.pkl"
+SIMV2I_DATA_ROOT = Path(
+    os.environ.get(
+        "SIMV2I_HD_ROOT",
+        ROOT / "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k",
+    )
 )
+INFO_PKL = SIMV2I_DATA_ROOT / "simv2i_maptr_infos_test.pkl"
+RAW_ROOT = Path(os.environ.get("SIMV2I_HD_RAW_ROOT", ROOT / "data/raw"))
 RSU_LAYOUT_METADATA = (
-    ROOT
-    / "data/raw/"
-    "simv2i_hd_benchmark_v2_dynamic_rsu_town10_r040_clear_heavy_"
+    RAW_ROOT
+    / "simv2i_hd_benchmark_v2_dynamic_rsu_town10_r040_clear_heavy_"
     "4rsu_dynamic_top4_vqprior_strict/metadata/run.json"
 )
 DEFAULT_OUTPUT_ROOT = (

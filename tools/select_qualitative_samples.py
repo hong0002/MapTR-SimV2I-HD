@@ -2,6 +2,7 @@
 """Select qualitative SimV2I-HD MapTR samples with simple proxy scores."""
 
 import argparse
+import os
 from collections import Counter
 
 from visualize_simv2i_maptr_predictions import (
@@ -24,6 +25,10 @@ DEFAULT_PREDS = {
         "outputs/maptr/visualization_predictions/pose_gated_top4_test_epoch18.pkl"
     ),
 }
+DEFAULT_DATA_ROOT = os.environ.get(
+    "SIMV2I_HD_ROOT",
+    "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k",
+)
 
 
 def parse_args():
@@ -32,10 +37,7 @@ def parse_args():
     )
     parser.add_argument(
         "--gt-json",
-        default=(
-            "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/"
-            "simv2i_maptr_map_gt_test.json"
-        ),
+        default=os.path.join(DEFAULT_DATA_ROOT, "simv2i_maptr_map_gt_test.json"),
     )
     parser.add_argument("--score-thr", type=float, default=0.3)
     parser.add_argument("--top-k", type=int, default=20)

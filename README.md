@@ -43,7 +43,8 @@ docs/                           Additional setup and data notes
 Create the environment and build the legacy OpenMMLab extensions:
 
 ```bash
-export MAPTR_ROOT=/path/to/MapTR
+export MAPTR_ROOT=/path/to/MapTR-SimV2I-HD
+export SIMV2I_HD_ROOT=/path/to/simv2i_hd_benchmark_v2_dynamic_rsu_20k
 cd "${MAPTR_ROOT}"
 
 conda env create -f integrations/maptr/environment/maptr_legacy.yml
@@ -60,23 +61,32 @@ For detailed setup notes, see [INSTALL.md](INSTALL.md).
 
 ## Data
 
-The paper configs expect the SimV2I-HD MapTR-format annotation files below the
-repository root:
+The full SimV2I-HD dataset is not included in this repository. Set
+`SIMV2I_HD_ROOT` to the prepared MapTR-format SimV2I-HD dataset directory. The
+directory should contain the train/val/test annotation PKLs, vectorized map GT
+JSON files, and image folders referenced by the PKLs:
 
 ```text
-data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/
+${SIMV2I_HD_ROOT}/
 ├── simv2i_maptr_infos_train.pkl
 ├── simv2i_maptr_infos_val.pkl
 ├── simv2i_maptr_infos_test.pkl
 ├── simv2i_maptr_map_gt_train.json
 ├── simv2i_maptr_map_gt_val.json
-└── simv2i_maptr_map_gt_test.json
+├── simv2i_maptr_map_gt_test.json
+└── image folders referenced by the PKL files
 ```
 
-The image paths stored in the PKLs are repo-relative, for example
-`data/raw/...`. If your dataset lives outside the repository, set
-`SIMV2I_HD_ROOT` and create symlinks into `data/` rather than editing paper
-configs.
+The public SimV2I-HD configs read `SIMV2I_HD_ROOT` directly. For backward
+compatibility with the original experiment workspace, they also fall back to
+`data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k` when the environment
+variable is not set. A symlink under `data/maptr/` can be used for that legacy
+layout, but storing the dataset inside this Git repository is not required.
+
+During evaluation, MapTR writes an additional generated GT cache under
+`outputs/maptr/eval_cache/` through the config field `map_ann_file`. This cache
+is built automatically from the split PKL annotations when it is missing; it is
+not a dataset file and is intentionally ignored by git.
 
 See [DATA.md](DATA.md) for the expected layout and validation commands.
 
@@ -110,7 +120,7 @@ Validate the dataset structure:
 
 ```bash
 bash scripts/validate_server_maptr_data.sh \
-  --dataset-dir data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k \
+  --dataset-dir "${SIMV2I_HD_ROOT}" \
   --require-data
 ```
 

@@ -14,10 +14,12 @@ export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/matplotlib-maptr}"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-/tmp/maptr-cache}"
 mkdir -p "${MPLCONFIGDIR}" "${XDG_CACHE_HOME}" "${XDG_CACHE_HOME}/fontconfig"
 mkdir -p "${OUT_DIR}"
+maptr_require_simv2i_data
+DATASET_DIR="$(maptr_simv2i_dataset_dir)"
 
 "${PYTHON_BIN}" tools/visualize_simv2i_maptr_predictions.py \
-  --gt-json data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/simv2i_maptr_map_gt_test.json \
-  --infos-pkl data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/simv2i_maptr_infos_test.pkl \
+  --gt-json "${DATASET_DIR}/simv2i_maptr_map_gt_test.json" \
+  --infos-pkl "${DATASET_DIR}/simv2i_maptr_infos_test.pkl" \
   --pred-pkl ego_only=outputs/maptr/visualization_predictions/ego_only_test_epoch18.pkl \
   --pred-pkl dynamic_top4=outputs/maptr/visualization_predictions/dynamic_top4_test_epoch18.pkl \
   --pred-pkl pose_gated_top4=outputs/maptr/visualization_predictions/pose_gated_top4_test_epoch18.pkl \
@@ -44,13 +46,14 @@ mkdir -p "${OUT_DIR}"
   --save-pdf \
   --report-path "${OUT_DIR}/PAPER_FIGURE_SAMPLE3608_VISUALIZATION_REPORT.md"
 
-"${PYTHON_BIN}" - "${REPORT_PATH}" "${PNG_PATH}" "${PDF_PATH}" <<'PY'
+"${PYTHON_BIN}" - "${REPORT_PATH}" "${PNG_PATH}" "${PDF_PATH}" "${DATASET_DIR}" <<'PY'
 import sys
 from pathlib import Path
 
 report_path = Path(sys.argv[1])
 png_path = Path(sys.argv[2])
 pdf_path = Path(sys.argv[3])
+dataset_dir = Path(sys.argv[4])
 
 lines = [
     "# Paper-Ready Sample 3608 Figure Report",
@@ -73,8 +76,8 @@ lines = [
     "",
     "## GT Files",
     "",
-    "- GT JSON: data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/simv2i_maptr_map_gt_test.json",
-    "- infos PKL: data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k/simv2i_maptr_infos_test.pkl",
+    f"- GT JSON: {dataset_dir / 'simv2i_maptr_map_gt_test.json'}",
+    f"- infos PKL: {dataset_dir / 'simv2i_maptr_infos_test.pkl'}",
     "",
     "## Paper-Ready Styling",
     "",

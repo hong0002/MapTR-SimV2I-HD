@@ -4,7 +4,7 @@
 The default workflow uses saved prediction files and does not run inference:
 
     python tools/plot_qualitative_cases.py \
-      --data-root data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k \
+      --data-root "${SIMV2I_HD_ROOT}" \
       --split test \
       --ego-pred outputs/maptr/visualization_predictions/ego_only_test_epoch18.pkl \
       --dynamic-top4-pred outputs/maptr/visualization_predictions/dynamic_top4_test_epoch18.pkl \
@@ -65,7 +65,10 @@ from visualize_simv2i_maptr_predictions import (  # noqa: E402
 )
 
 
-DEFAULT_DATA_ROOT = "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k"
+DEFAULT_DATA_ROOT = os.environ.get(
+    "SIMV2I_HD_ROOT",
+    "data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k",
+)
 DEFAULT_PREDS = {
     "ego_only": "outputs/maptr/visualization_predictions/ego_only_test_epoch18.pkl",
     "dynamic_top4": (
