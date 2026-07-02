@@ -8,8 +8,10 @@ Markdown report. It does not train the model and does not run or save MapTR
 predictions.
 
 Example:
-    env PYTHONPATH=/data1/jihong/MapTR:/data1/jihong/MapTR/mmdetection3d \
-      /home/oem/anaconda3/envs/maptr_simv2i/bin/python \
+    export MAPTR_ROOT=/path/to/MapTR
+    export MAPTR_PYTHON=/path/to/conda/envs/maptr_simv2i/bin/python
+    env PYTHONPATH="${MAPTR_ROOT}:${MAPTR_ROOT}/mmdetection3d" \
+      "${MAPTR_PYTHON}" \
       tools/export_pose_gate_stats.py \
       --config integrations/maptr/configs/simv2i_maptr_pose_gated_v2i_r18_20k_b4.py \
       --checkpoint outputs/maptr/pose_gated_v2i_r18_20k_b4/epoch_24.pth \

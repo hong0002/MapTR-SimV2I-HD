@@ -6,8 +6,6 @@ set -euo pipefail
 #   GPUS=4 bash scripts/run_maptr_gate_constant_v2i_train_20k_b4_full.sh \
 #     --resume-from outputs/maptr/gate_constant_v2i_r18_20k_b4/epoch_XX.pth
 
-cd /data1/jihong/MapTR
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/_maptr_runtime.sh"
 maptr_init

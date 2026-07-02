@@ -2,8 +2,8 @@
 
 ## Recorded State
 
-- SimV2I-HD integration root: `/data1/jihong/MapTR`
-- MapTR repo root: `/data1/jihong/MapTR`
+- SimV2I-HD integration root: `${MAPTR_ROOT}`
+- MapTR repo root: `${MAPTR_ROOT}`
 - Clone layout: direct MapTR clone, no `third_party/MapTR` wrapper
 - Remote: `https://github.com/hustvl/MapTR.git`
 - Commit: `a6872d8d9670bde17b4b01560f1221f88b443d55`
@@ -48,7 +48,8 @@ through `<1.0.0`.
 Use the reference environment as a starting point:
 
 ```bash
-cd /data1/jihong/MapTR
+export MAPTR_ROOT=/path/to/MapTR
+cd "${MAPTR_ROOT}"
 conda env create -f integrations/maptr/environment/maptr_legacy.yml
 conda activate maptr_simv2i
 ```
@@ -65,18 +66,18 @@ pip install mmdet==2.14.0 mmsegmentation==0.14.1
 Install the bundled source and MapTR CUDA operation:
 
 ```bash
-cd /data1/jihong/MapTR/mmdetection3d
+cd "${MAPTR_ROOT}/mmdetection3d"
 python setup.py develop
 
-cd /data1/jihong/MapTR/projects/mmdet3d_plugin/maptr/modules/ops/geometric_kernel_attn
+cd "${MAPTR_ROOT}/projects/mmdet3d_plugin/maptr/modules/ops/geometric_kernel_attn"
 python setup.py build install
 ```
 
 Then confirm:
 
 ```bash
-cd /data1/jihong/MapTR
-PYTHONPATH="$PWD:$PWD/mmdetection3d" python -c \
+cd "${MAPTR_ROOT}"
+PYTHONPATH="${MAPTR_ROOT}:${MAPTR_ROOT}/mmdetection3d" python -c \
   "import torch, mmcv, mmdet, mmdet3d; print(torch.__version__, mmcv.__version__, mmdet.__version__, mmdet3d.__version__, torch.cuda.is_available())"
 ```
 

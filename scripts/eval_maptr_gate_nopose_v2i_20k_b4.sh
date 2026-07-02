@@ -3,8 +3,6 @@ set -euo pipefail
 
 # Run after: conda activate maptr_simv2i
 
-cd /data1/jihong/MapTR
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/_maptr_runtime.sh"
 maptr_init

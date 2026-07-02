@@ -110,7 +110,8 @@ least two finite 2D points.
 ## Validate After Transfer
 
 ```bash
-cd /data1/jihong/MapTR
+export MAPTR_ROOT=/path/to/MapTR
+cd "${MAPTR_ROOT}"
 bash scripts/validate_server_maptr_data.sh --require-data
 ```
 

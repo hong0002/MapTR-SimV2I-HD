@@ -148,10 +148,16 @@ cluster.sh
 
 # SimV2I-HD local data and experiment artifacts
 /outputs/
+/results/
+/logs/
+/runs/
 /wandb/
 /mlruns/
+/tensorboard/
 /.tensorboard-info/
 events.out.tfevents*
+*.pkl
+*.pickle
 *.pth
 *.pt
 *.ckpt

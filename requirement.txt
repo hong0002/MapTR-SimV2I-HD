@@ -1,2 +1,4 @@
-shapely==1.8.5.post1
-av2
+# Backward-compatible legacy filename.
+# Prefer installing from requirements.txt or, better, from
+# integrations/maptr/environment/maptr_legacy.yml.
+-r requirements.txt
