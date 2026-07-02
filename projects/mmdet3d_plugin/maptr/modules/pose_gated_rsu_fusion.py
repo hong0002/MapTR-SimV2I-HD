@@ -62,7 +62,13 @@ class PoseAwareGatedRSUFusion(nn.Module):
                 torch.full((self.rsu_view_count,), float(nopose_gate_init))
             )
 
-    def forward(self, img_feats, img_metas, collect_stats=False):
+    def forward(
+        self,
+        img_feats,
+        img_metas,
+        collect_stats=False,
+        return_details=False,
+    ):
         if img_feats is None or len(img_feats) == 0:
             return img_feats, None
 
@@ -140,6 +146,7 @@ class PoseAwareGatedRSUFusion(nn.Module):
                 ref_feat,
                 num_views,
                 rsu_count,
+                return_details=return_details,
             )
         return gated_feats, stats
 
@@ -233,13 +240,14 @@ class PoseAwareGatedRSUFusion(nn.Module):
         ref_feat,
         num_views,
         rsu_count,
+        return_details=False,
     ):
         gates_detached = gates.detach()
         fallback_detached = fallback_mask.detach()
         pose_abs_mean = None
         if pose_feats is not None:
             pose_abs_mean = float(pose_feats.detach().abs().mean().cpu())
-        return dict(
+        summary = dict(
             gate_mode=self.gate_mode,
             use_pose_metadata=self.use_pose_metadata,
             learnable_gate=self.gate_mode in ('pose', 'nopose'),
@@ -268,3 +276,12 @@ class PoseAwareGatedRSUFusion(nn.Module):
             num_views=int(num_views),
             rsu_count=int(rsu_count),
         )
+        if return_details:
+            summary.update(
+                gate_values=gates_detached.cpu().tolist(),
+                fallback_mask=fallback_detached.cpu().tolist(),
+                pose_features=pose_feats.detach().cpu().tolist()
+                if pose_feats is not None
+                else None,
+            )
+        return summary

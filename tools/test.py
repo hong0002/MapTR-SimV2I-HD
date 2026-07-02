@@ -237,8 +237,10 @@ def main():
     if rank == 0:
         if args.out:
             print(f'\nwriting results to {args.out}')
-            assert False
-            #mmcv.dump(outputs['bbox_results'], args.out)
+            out_dir = osp.dirname(osp.abspath(args.out))
+            if out_dir:
+                mmcv.mkdir_or_exist(out_dir)
+            mmcv.dump(outputs, args.out)
         kwargs = {} if args.eval_options is None else args.eval_options
         kwargs.setdefault(
             'jsonfile_prefix',
