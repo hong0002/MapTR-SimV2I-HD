@@ -61,7 +61,8 @@ For detailed setup notes, see [INSTALL.md](INSTALL.md).
 
 ## Data
 
-The full SimV2I-HD dataset is not included in this repository. Set
+The full SimV2I-HD dataset is not included in this repository. The main paper
+experiments use the scenario-disjoint controlled 20k dynamic-RSU split. Set
 `SIMV2I_HD_ROOT` to the prepared MapTR-format SimV2I-HD dataset directory. The
 directory should contain the train/val/test annotation PKLs, vectorized map GT
 JSON files, and image folders referenced by the PKLs:
@@ -82,6 +83,12 @@ compatibility with the original experiment workspace, they also fall back to
 `data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k` when the environment
 variable is not set. A symlink under `data/maptr/` can be used for that legacy
 layout, but storing the dataset inside this Git repository is not required.
+
+Geo subset configs use `SIMV2I_HD_GEO_ROOT` for annotation PKL/GT JSON files
+and `SIMV2I_HD_IMAGE_ROOT` for resolving image paths stored in the PKLs. When
+`SIMV2I_HD_IMAGE_ROOT` is unset, image paths resolve from `.` so repo-relative
+entries such as `data/raw/...` work. Symlinking raw images under `data/raw` is
+only an optional compatibility workaround.
 
 During evaluation, MapTR writes an additional generated GT cache under
 `outputs/maptr/eval_cache/` through the config field `map_ann_file`. This cache

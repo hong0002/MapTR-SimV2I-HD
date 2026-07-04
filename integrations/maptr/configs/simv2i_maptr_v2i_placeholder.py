@@ -1,6 +1,9 @@
-# Design-only placeholder. This file intentionally defines no trainable model.
-placeholder_only = True
-implementation_status = 'TODO: separate ego/RSU encoders and BEV fusion'
+# Design-only inactive reference. This file intentionally defines no trainable model.
+design_stub_only = True
+implementation_status = (
+    'inactive reference; use the executable ego-only, dynamic-RSU, and '
+    'pose-gated V2I configs for training and evaluation'
+)
 
 ego_camera_names = [
     'CAM_FRONT',

@@ -20,8 +20,8 @@ See [INSTALL.md](INSTALL.md) for environment creation and extension builds.
 
 ## 2. Prepare Data
 
-Prepare the 20k dynamic-RSU MapTR-format split outside the git repository and
-export its root:
+Prepare the scenario-disjoint controlled 20k dynamic-RSU MapTR-format split
+outside the git repository and export its root:
 
 ```bash
 export SIMV2I_HD_ROOT=/path/to/simv2i_hd_benchmark_v2_dynamic_rsu_20k
@@ -40,6 +40,19 @@ config files. For backward compatibility only, the same configs also fall back
 to `data/maptr/simv2i_hd_benchmark_v2_dynamic_rsu_20k` if the environment
 variable is unset. See [DATA.md](DATA.md) for the full expected layout and the
 optional symlink workflow.
+
+For the geo subset configs, keep the annotation root and image root separate:
+
+```bash
+export SIMV2I_HD_GEO_ROOT=/path/to/simv2i_hd_benchmark_v2_dynamic_rsu_20k_geo_subset
+# Optional. Leave unset when PKL paths such as data/raw/... resolve from MAPTR_ROOT.
+export SIMV2I_HD_IMAGE_ROOT=/path/whose/child/is/data/raw
+```
+
+The geo wrappers check that `SIMV2I_HD_GEO_ROOT` contains the split PKL/GT JSON
+files and that `SIMV2I_HD_IMAGE_ROOT` or `.` can resolve sample image paths.
+Symlinking `data/raw` under `${MAPTR_ROOT}` remains an optional compatibility
+workaround.
 
 ## 3. Main Configs
 

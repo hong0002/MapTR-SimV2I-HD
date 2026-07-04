@@ -1,15 +1,17 @@
-# MapTR V2I Extension Plan
+# MapTR V2I Design Notes
+
+This note records the V2I design intent behind the SimV2I-HD MapTR integration.
+The executable paper configs live under `integrations/maptr/configs/`.
 
 ## Camera Modes
 
-- Ego-only: six vehicle cameras, implemented now
-- RSU-only: four infrastructure cameras, dataset/config work pending
-- V2I: six vehicle plus four RSU cameras, model work pending
+- Ego-only: six vehicle cameras.
+- Dynamic Top-4 RSU: selected infrastructure cameras are added using the
+  dynamic RSU selection metadata.
+- Pose-gated Top-4 V2I: selected RSU features are modulated by pose-aware gates
+  before fusion.
 
-The placeholder camera groups live in
-`integrations/maptr/configs/simv2i_maptr_v2i_placeholder.py`.
-
-## Naive Ten-Camera Diagnostic
+## Diagnostic Ten-camera Input
 
 A flattened ten-camera input can check path loading, calibration, memory use,
 and whether all views reach the encoder. It is not the target V2I model:
@@ -21,17 +23,17 @@ and whether all views reach the encoder. It is not the target V2I model:
 
 This mode should be labeled `naive_flattened` and used only as a diagnostic.
 
-## Proper V2I Design
+## V2I Design
 
-1. Build separate ego and infrastructure image/BEV branches.
-2. Transform RSU BEV features into the current ego frame using calibrated
-   world poses.
-3. Add timestamp matching, valid-view masks, and stale-message rejection.
-4. Fuse aligned BEV features with masked attention or confidence gating.
+1. Use ego and infrastructure image/BEV features with calibrated metadata.
+2. Transform or align RSU observations into the current ego frame using world
+   poses.
+3. Use timestamp matching and valid-view masks when available.
+4. Fuse aligned BEV features with confidence-aware or pose-aware gating.
 5. Keep the MapTR vector head and GT in the ego coordinate frame.
-6. Report ego-only, RSU-only, naive ten-camera, and proper V2I ablations.
+6. Report ego-only, dynamic RSU selection, and pose-gated V2I ablations.
 
-Required additional pickle metadata:
+Required metadata:
 
 - Camera timestamps and frame synchronization IDs
 - RSU camera intrinsics and camera-to-RSU extrinsics
@@ -39,8 +41,9 @@ Required additional pickle metadata:
 - Ego pose in world coordinates
 - Per-camera validity and communication availability
 
-## Implementation Boundaries
+## Reporting Boundary
 
-This setup does not implement LiDAR fusion, an RSU encoder, BEV alignment,
-communication simulation, or a V2I fusion module. The placeholder is
-intentionally not trainable so it cannot be mistaken for the proper model.
+Main paper quantitative claims should use the scenario-disjoint controlled 20k
+split. The geographically buffered subset is a diagnostic stress protocol for
+studying held-out geographic-region generalization, not a replacement for the
+main benchmark.

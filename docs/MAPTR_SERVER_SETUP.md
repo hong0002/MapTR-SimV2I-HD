@@ -89,8 +89,10 @@ PYTHONPATH="${MAPTR_ROOT}:${MAPTR_ROOT}/mmdetection3d" python -c \
   `integrations/maptr/configs/simv2i_maptr_ego_r18_compact.py`
 - Stronger ego config:
   `integrations/maptr/configs/simv2i_maptr_ego_r18_stronger.py`
-- V2I design placeholder:
-  `integrations/maptr/configs/simv2i_maptr_v2i_placeholder.py`
+- V2I experiment configs:
+  `integrations/maptr/configs/simv2i_maptr_v2_dynamic_rsu_top4_r18_20k.py`
+  and
+  `integrations/maptr/configs/simv2i_maptr_pose_gated_v2i_r18_20k_b4.py`
 
 The adapter selects only the six vehicle cameras, consumes precomputed local
 vector GT, and does not load point clouds. Coordinates are x-right,
@@ -157,6 +159,7 @@ not present and the current Python/CUDA environment is not ready.
 
 ## V2I Status
 
-The current executable configs are ego-only. The V2I placeholder separates a
-naive ten-camera concatenation diagnostic from the intended two-branch,
-calibration-aware BEV fusion design. See `docs/MAPTR_V2I_PLAN.md`.
+The executable public configs include ego-only, Dynamic Top-4 RSU, and
+Pose-gated Top-4 V2I variants. Historical V2I design notes remain in
+`docs/MAPTR_V2I_PLAN.md` for context; use the executable configs and public
+wrappers for reproducible experiments.

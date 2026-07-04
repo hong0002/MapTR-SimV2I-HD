@@ -11,7 +11,8 @@ export SIMV2I_HD_ROOT=/path/to/simv2i_hd_benchmark_v2_dynamic_rsu_20k
 
 ## Expected External Dataset Root
 
-The main ACCV experiments use the 20k dynamic-RSU split:
+The main ACCV experiments use the scenario-disjoint controlled 20k dynamic-RSU
+split:
 
 ```text
 ${SIMV2I_HD_ROOT}/
@@ -40,6 +41,43 @@ If image paths inside the PKLs are relative, they are resolved from
 `SIMV2I_HD_ROOT` when that environment variable is set. Therefore the external
 dataset root should contain the image folders in the same relative layout used
 by the PKLs.
+
+## Geo Subset Annotation Root And Image Root
+
+The geographically separated subset is an annotation-only split bundle. Its
+directory contains the geo train/val/test PKLs and GT JSON files, but not
+necessarily the raw images:
+
+```bash
+export SIMV2I_HD_GEO_ROOT=/path/to/simv2i_hd_benchmark_v2_dynamic_rsu_20k_geo_subset
+```
+
+Geo configs intentionally separate this annotation root from the image root:
+
+- `SIMV2I_HD_GEO_ROOT` resolves `ann_file` and geo split GT JSON files.
+- `SIMV2I_HD_IMAGE_ROOT` resolves relative image paths stored in the PKLs.
+- If `SIMV2I_HD_IMAGE_ROOT` is unset, geo configs use `.` so repo-relative
+  paths such as `data/raw/...` work from `MAPTR_ROOT`.
+
+For example, when the PKLs contain `data/raw/...` paths and `data/raw` exists
+under the repository:
+
+```bash
+cd "${MAPTR_ROOT}"
+export SIMV2I_HD_GEO_ROOT=/path/to/simv2i_hd_benchmark_v2_dynamic_rsu_20k_geo_subset
+unset SIMV2I_HD_IMAGE_ROOT
+```
+
+If raw images live elsewhere, point `SIMV2I_HD_IMAGE_ROOT` to the directory
+whose child path matches the PKL entries:
+
+```bash
+export SIMV2I_HD_IMAGE_ROOT=/path/whose/child/is/data/raw
+```
+
+As an optional compatibility workaround, you can also symlink the raw image
+layout into `${MAPTR_ROOT}/data/raw` so the default `.` image root resolves the
+PKL paths. The symlink is not required when `SIMV2I_HD_IMAGE_ROOT` is set.
 
 ## Split And Classes
 
